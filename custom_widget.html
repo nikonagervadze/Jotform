@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Search Widget</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--include JotFormCustom widget script-->
+    <script src="//js.jotform.com/JotFormCustomWidget.min.js"></script>
+</head>
+<body>
+    <div>
+        <label for="movieInput">Enter Movie Name:</label>
+        <input type="text" id="movieInput">
+        <button id="searchBtn">Search</button>
+    </div>
+    <div id="movieDetails"></div>
+
+    <script>
+        // Subscribe to the ready event
+        JFCustomWidget.subscribe("ready", function (msg) {
+            console.log("Custom widget ready");
+        });
+
+        // Subscribe to the submit event
+        JFCustomWidget.subscribe("submit", function (msg) {
+            // Extract movie details from the DOM and send as result
+            var movieTitle = $("#movieTitle").text();
+            var movieYear = $("#movieYear").text();
+            var moviePlot = $("#moviePlot").text();
+
+            var data = {
+                title: movieTitle,
+                year: movieYear,
+                plot: moviePlot
+            };
+
+            JFCustomWidget.sendResult(data);
+        });
+
+        // Search button click event
+        $("#searchBtn").click(function () {
+            var movieName = $("#movieInput").val();
+            if (movieName.trim() !== "") {
+                searchMovie(movieName);
+            } else {
+                alert("Please enter a movie name.");
+            }
+        });
+
+        // Function to search for movie details
+        function searchMovie(movieName) {
+            var apiKey = "195f02c6";
+            var apiUrl = "https://www.omdbapi.com/?t=" + encodeURIComponent(movieName) + "&apikey=" + apiKey;
+
+            $.ajax({
+                url: apiUrl,
+                method: "GET",
+                success: function (response) {
+                    if (response.Response === "True") {
+                        displayMovieDetails(response);
+                    } else {
+                        alert("Movie not found!");
+                    }
+                },
+                error: function () {
+                    alert("Error occurred while fetching movie details.");
+                }
+            });
+        }
+
+        // Function to display movie details
+        function displayMovieDetails(movie) {
+            $("#movieDetails").html(
+                "<h3 id='movieTitle'>" + movie.Title + "</h3>" +
+                "<p id='movieYear'>Year: " + movie.Year + "</p>" +
+                "<p id='moviePlot'>Plot: " + movie.Plot + "</p>"
+            );
+        }
+    </script>
+</body>
+</html>
